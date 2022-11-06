@@ -12,7 +12,7 @@ The `main().ahk` file is the only thing that needs to be ran.
 
 Default hotkey is `CapsLock + Spacebar`.
 
-Type a question mark (`?`) into the box to see majority of the commands. This will give you an idea of what you can do. Some things will needs to be changed if you wish to actually use them, such as the  directories used or your email address for typing your email. The underscores (`_`) that follow the command represent a space. It should be pretty easy to figure out how to add your own when looking at the commands.ahk file.
+Type a question mark (`?`) into the box to see majority of the commands. This will give you an idea of what you can do. Some things will needs to be changed if you wish to actually use them, such as the  directories used or your email address for typing your email. The underscores (`_`) that follow the command represent a space. It should be pretty easy to figure out how to add your own when looking at the `commands.ahk` file.
 
 One thing to note when adding commands, I coded the command function in a way so that every command doesn't need to destroy the gui. Because of this, there are some things that have to be wrapped in a SetTimer(). A common example of this is trying to send text to the screen. Without the timer, it would send the text to the gui before destroying it instead of the program you want the text to end up. I've included a `SendTextToScreen()` function that can automatically do that, just pass the text as a parameter.
 
