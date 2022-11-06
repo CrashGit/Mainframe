@@ -4,7 +4,7 @@ Initially started as this older, but popular gui: https://github.com/plul/Public
 
 I have updated it to AHK v2 with very heavy modifications, adding a new aesthetic and functionality.
 
-![](https://github.com/Mainframe/blob/main/gui.gif)
+![](https://github.com/CrashGit/Mainframe/blob/main/gui.gif)
 
 If you're not familiar with how this works, the idea is to type commands into a box to perform actions. I find this ideal because it's easier to remember words associated with actions rather than a ton of very specific hotkeys.
 
