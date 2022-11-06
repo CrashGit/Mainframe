@@ -202,27 +202,15 @@ case 'shut down':	; Shut down computer
 	Shutdown(8)
 
 case 'connect':		; Connect to TV
-	Send('#k')
-	; Sleep, 2000	; Windows 10
-	; Send Enter
-	; Sleep, 200
-	; Send 55
-	; Sleep, 200
-	; Send Tab
-	; Sleep, 100
-	; Send Enter
-	Send('{Down 1}')	; change number to how many down your device is typically found
-	Send('Enter')	; Windows 11
+	Send('#k')		; Windows 11
+	Sleep(1000)
+	Send('{Enter}')
 
 case 'disconnect':	; Disconnect from TV
-	Send('#k')
-	Sleep(500)
-	; Loop, 4		; Windows 10
-	; Send Tab
-	; Send Enter		
-
-	Send('Tab')
-	Send('Enter')
+	Send('#k')		; Windows 11
+	Sleep(500)		
+	Send('{Tab}')
+	Send('{Enter}')
 
 case 'refresh':		; Reload this script		
 	Reload		
