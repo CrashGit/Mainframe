@@ -77,7 +77,7 @@ NewFileExtension(secondary_input, tertiary_input)
     fileExtension := fileExtension != '' ? fileExtension : 'ahk'    ; leave tertiary_field blank to default to ahk file type
     newFile :=  fileName '.' fileExtension
     
-    selectedDirectory := DirSelect('*C:\Users\Crash\Desktop\autohotkey',, 'Select the folder you want the file to be created in')  ; choose directory to create new file
+    selectedDirectory := DirSelect('*C:\Users\' A_UserName '\Desktop\autohotkey',, 'Select the folder you want the file to be created in')  ; choose directory to create new file
     if selectedDirectory = ''     ; cancels file creation if user cancels folder selection
         return
     
