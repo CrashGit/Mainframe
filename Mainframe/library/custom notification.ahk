@@ -1,5 +1,15 @@
 SetWinDelay(-1)
 
+~LButton::      ; hide notification if clicked, in case it gets in the way
+{
+    if IsSet(Notify) {
+        MouseGetPos(,, &Hwnd,, 2)
+        notify_ID := WinGetID(Notify)
+        if Hwnd = notify_ID
+            Notify.Hide()
+    }
+}
+
 ShowNotification(title, message, beepTone)
 {
     DestroyNotificationIfSet()  ; prevents issues if notification is already up
