@@ -26,4 +26,8 @@ If you don't want these two files, just delete them and remove the #Include line
 
 Hovering the mouse over the titles will also show a tooltip with a brief description.
 
-Not sure if I'll be updating this. I didn't compensate for different dpi scalings and I'm unsure if screen resolution plays a factor in anything. Just wanted to put it out there to inspire others.
+I wasn't a fan of TrayTips so I created a custom notification banner that fades/slides in and out.
+
+Added a unique animation when reloading the script. Still new to classes so it probably looks like a disaster to anyone used to writing them. I'm not sure how to get the text closer to one another, or how to make it easier to insert whatever text you want it to be.
+
+Not sure if I'll be updating this much. I didn't compensate for different dpi scalings and I'm unsure if screen resolution plays a factor in anything. Just wanted to put it out there to inspire others.
