@@ -24,8 +24,6 @@ class BouncingText
         this.final_position     := A_ScreenHeight / 2
         this.bounce_apex        := A_ScreenHeight / 4
 
-        this.gui_height         := unset
-        this.guiY               := unset
         this.gui                := Gui('+AlwaysOnTop +ToolWindow -SysMenu -Caption -Border')
         this.gui.BackColor      := '000000'
         this.gui.SetFont('s17 bold', 'Segoe UI')
@@ -56,10 +54,9 @@ class BouncingText
         this.gui.Show(this.position ' y0 AutoSize NoActivate')
         WinSetTransColor('000000', this.gui)
 
-        WinGetPos(,,, &gui_height, this.gui)  ; get height of gui
-        this.gui_height := gui_height
-        this.starting_position := 0 - this.gui_height
-        WinMove(, this.starting_position,,, this.gui) ; move gui just out of view above the monitor
+        WinGetPos(,,, &gui_height, this.gui)            ; get height of gui
+        this.starting_position := 0 - gui_height        ; set starting position just out of view
+        WinMove(, this.starting_position,,, this.gui)   ; move gui just out of view above the monitor
 
         SetTimer(this.falling, 10)
         SetTimer(this.coloring, 100)
@@ -68,16 +65,15 @@ class BouncingText
     Fall()
     {
         WinGetPos(, &guiY,,, this.gui)                  ; get position to initialize guiY
-        this.guiY := guiY
-        WinMove(, this.guiY + this.acceleration,,, this.gui) ; move name 2 pixels down
+        WinMove(, guiY + this.acceleration,,, this.gui) ; move name 2 pixels down
         WinGetPos(, &guiY,,, this.gui)                  ; update position var again so if statement is easier to understand
-        this.guiY := guiY
 
-        if this.guiY >= this.final_position             ; pixels from the top
+        if guiY >= this.final_position                  ; pixels from the top
         {                
             SetTimer(this.falling, 0)
             WinMove(, this.final_position,,, this.gui)  ; move to final position
             this.count -= 1
+
             if this.count = 0 {
                 SetTimer(this.destroy, - this.destroyTime)
                 return
@@ -92,10 +88,8 @@ class BouncingText
     {
         this.deceleration := this.acceleration / 2 
         WinGetPos(, &guiY,,, this.gui)
-        this.guiY := guiY
-        WinMove(, this.guiY - this.deceleration,,, this.gui)
+        WinMove(, guiY - this.deceleration,,, this.gui)
         WinGetPos(, &guiY,,, this.gui)
-        this.guiY := guiY
         
         if guiY <= this.bounce_apex {               ; bounce is at or above apex                     
             SetTimer(this.bouncing, 0)                      ; stop bounce
