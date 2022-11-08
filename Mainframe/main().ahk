@@ -1,14 +1,18 @@
-﻿;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 ; AUTO EXECUTE
 ;-------------------------------------------------------------------------------
 #SingleInstance
 #Include library\main() commands library.ahk
 #Include library\main() secondary library.ahk
-#Include library\custom notification.ahk    ; both fade and slide
+#Include library\custom notification.ahk
+#Include library\splash-screen.ahk
+
+TraySetIcon('Shell32.dll', 305)
 
 
 ; initialize variables
 search_url   := unset
+vscode := 'C:\Users\' A_UserName '\AppData\Local\Programs\Microsoft VS Code\Code.exe '  ; script editing program of choice
 
 ; dracula theme color values used in the GUI
 pink    := 'cea84bb'
@@ -23,20 +27,16 @@ rgb := [pink, blue, green, yellow, purple, white, orange]   ; dracula theme colo
 ; rgb := ['cff0000', 'cff7f00', 'cffff00', 'c00bc3f', 'c0068ff', 'c7a00e5', 'cd300c9']  ; normal rgb colors for username
 
 
-TraySetIcon('Shell32.dll', 305)
-ShowNotification('Hack the Planet', 'Crash Override', 300)
-
-
 #HotIf WinActive('ahk_class AutoHotkeyGUI')
     ^BackSpace::Send('^+{Left}{Backspace}')     ; Control + BackSpace deletes word, normally doesn't work in GUI
     CapsLock & u::Send('^+{Left}{Backspace}')
 #HotIf
 
-^!r::Reload
-
 ;-------------------------------------------------------------------------------
 ; LAUNCH GUI
 ;-------------------------------------------------------------------------------
+^!r::Reload
+
 CapsLock & Space:: 
 {
     Gui_Spawn()
