@@ -24,7 +24,7 @@ class BouncingText
         this.final_position     := A_ScreenHeight / 2
         this.bounce_apex        := A_ScreenHeight / 4
 
-        this.gui                := Gui('+AlwaysOnTop +ToolWindow -SysMenu -Caption -Border')
+        this.gui                := Gui('+AlwaysOnTop +ToolWindow -SysMenu -Caption -Border ')
         this.gui.BackColor      := '000000'
         this.gui.SetFont('s17 bold', 'Segoe UI')
 
@@ -34,9 +34,9 @@ class BouncingText
         this.coloring   := ObjBindMethod(this, 'colorText')
     }
 
-    __New(_name, _prevGui, _time) 
+    __New(_letter, _prevGui, _time) 
     {
-        this.name := _name
+        this.letter := _letter
         this.prevGui := _prevGui
         this.destroyTime := _time
     }
@@ -46,17 +46,18 @@ class BouncingText
         if this.prevGui = ''
             this.position := 'x' A_ScreenWidth / 2 - 170
         else {
-            WinGetPos(&prevX,, &prevWidth,, this.prevGui.gui)
+            this.prevGui.gui.GetPos(&prevX,, &prevWidth)
             this.position := 'x' prevx + prevWidth
         }
 
-        this.gui.AddText('Center v' this.name, this.name)
+        WinSetExStyle('+0x20', this.gui)
+        this.gui.AddText('Center v' this.letter, this.letter)
         this.gui.Show(this.position ' y0 AutoSize NoActivate')
         WinSetTransColor('000000', this.gui)
 
-        WinGetPos(,,, &gui_height, this.gui)            ; get height of gui
+        this.gui.GetPos(,,, &gui_height)                ; get height of gui           
         this.starting_position := 0 - gui_height        ; set starting position just out of view
-        WinMove(, this.starting_position,,, this.gui)   ; move gui just out of view above the monitor
+        this.gui.Move(, this.starting_position)         ; move gui just out of view above the monitor
 
         SetTimer(this.falling, 10)
         SetTimer(this.coloring, 100)
@@ -64,14 +65,14 @@ class BouncingText
 
     Fall()
     {
-        WinGetPos(, &guiY,,, this.gui)                  ; get position to initialize guiY
-        WinMove(, guiY + this.acceleration,,, this.gui) ; move name 2 pixels down
-        WinGetPos(, &guiY,,, this.gui)                  ; update position var again so if statement is easier to understand
+        this.gui.GetPos(, &guiY) ; get position to initialize guiY
+        this.gui.Move(, guiY + this.acceleration) ; move name 2 pixels down
+        this.gui.GetPos(, &guiY) ; update position var again so if statement is easier to understand
 
         if guiY >= this.final_position                  ; pixels from the top
         {                
             SetTimer(this.falling, 0)
-            WinMove(, this.final_position,,, this.gui)  ; move to final position
+            this.gui.Move(, this.final_position)    ;move to final position
             this.count -= 1
 
             if this.count = 0 {
@@ -87,9 +88,10 @@ class BouncingText
     Bounce()
     {
         this.deceleration := this.acceleration / 2 
-        WinGetPos(, &guiY,,, this.gui)
-        WinMove(, guiY - this.deceleration,,, this.gui)
-        WinGetPos(, &guiY,,, this.gui)
+        this.gui.GetPos(, &guiY)
+        this.gui.Move(, guiY - this.deceleration)
+        this.gui.GetPos(, &guiY)
+
         
         if guiY <= this.bounce_apex {               ; bounce is at or above apex                     
             SetTimer(this.bouncing, 0)                      ; stop bounce
@@ -116,7 +118,7 @@ class BouncingText
     {
         static colorIndex := 7
 
-        try this.gui[this.name].SetFont(rgb[CheckColorIndexIsValid(colorIndex+1)])
+        try this.gui[this.letter].SetFont(rgb[CheckColorIndexIsValid(colorIndex+1)])
 
         CheckColorIndexIsValid(color)
         {
