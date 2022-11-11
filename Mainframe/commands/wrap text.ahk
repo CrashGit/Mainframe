@@ -44,7 +44,7 @@ case 'wrap':	; Wrap text in special characters
     SetTimer(RGBusernameSetup, 100)
 
 	WrapGui.Show('w400 h190')
-	RoundedCorners(15)
+	RoundedCorners(15, 'WrapGui')
 	ControlFocus(WrapGui['username_1'])	; I don't like the look of the selection box around the buttons or tabs so this defaults to not show
 
 
