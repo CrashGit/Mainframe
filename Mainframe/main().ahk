@@ -5,8 +5,6 @@
 #Include library\main() commands library.ahk
 #Include library\main() secondary library.ahk
 #Include library\custom notification.ahk
-; #Include library\custom notification-queue.ahk
-#Include library\RGB-Frame.ahk
 #Include library\splash-screen.ahk
 
 
