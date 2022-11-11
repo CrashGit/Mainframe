@@ -5,14 +5,17 @@
 #Include library\main() commands library.ahk
 #Include library\main() secondary library.ahk
 #Include library\custom notification.ahk
+; #Include library\custom notification-queue.ahk
+#Include library\RGB-Frame.ahk
 #Include library\splash-screen.ahk
+
 
 TraySetIcon('Shell32.dll', 305)
 
 
 ; initialize variables
 search_url   := unset
-vscode := 'C:\Users\' A_UserName '\AppData\Local\Programs\Microsoft VS Code\Code.exe '  ; script editing program of choice
+open_with_vscode := 'C:\Users\' A_UserName '\AppData\Local\Programs\Microsoft VS Code\Code.exe '  ; script editing program of choice
 
 ; dracula theme color values used in the GUI
 pink    := 'cea84bb'
@@ -29,7 +32,6 @@ rgb := [pink, blue, green, yellow, purple, white, orange]   ; dracula theme colo
 
 #HotIf WinActive('ahk_class AutoHotkeyGUI')
     ^BackSpace::Send('^+{Left}{Backspace}')     ; Control + BackSpace deletes word, normally doesn't work in GUI
-    CapsLock & u::Send('^+{Left}{Backspace}')
 #HotIf
 
 ;-------------------------------------------------------------------------------
@@ -94,7 +96,7 @@ Gui_Spawn() ; initial gui
     SetTimer(RGBusernameSetup, 100) ; adjust time to increase or decrease color-changing speed
 
     MainGui.Show('AutoSize')
-    RoundedCorners(15)
+    RoundedCorners(15, 'MainGui')
 
     OnMessage(0x200, TitleToolTip)      ; call this function when moving the mouse over the gui
 }  
@@ -125,7 +127,7 @@ Gui_Show_Secondary(function, guiTitle, title_tooltip)
     DisableMainGui()            ; disables first section when gui extends
 
     MainGui.Show('AutoSize')
-    RoundedCorners(15)          ; rounds the corners of the gui    
+    RoundedCorners(15, 'MainGui')          ; rounds the corners of the gui    
 }
 
 ; -------------------------------------------------------------------------------
@@ -154,7 +156,7 @@ Gui_Show_Tertiary(function, guiTitle, title_tooltip)
     DisableCommandGui()         ; disables 2nd gui layer
 
     MainGui.Show('AutoSize')
-    RoundedCorners(15)          ; rounds the corners of the gui
+    RoundedCorners(15, 'MainGui')          ; rounds the corners of the gui
 
     ControlFocus MainGui['tertiary_field']
 }
@@ -208,20 +210,22 @@ RGBusername(gui)
 {
     static colorIndex   := 7
 
-    try %gui%['username_1' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; C
-    try %gui%['username_2' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; r
-    try %gui%['username_3' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; a
-    try %gui%['username_4' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; s
-    try %gui%['username_5' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; h
+    try {
+        %gui%['username_1' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; C
+        %gui%['username_2' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; r
+        %gui%['username_3' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; a
+        %gui%['username_4' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; s
+        %gui%['username_5' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; h
 
-    try %gui%['username_6' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; O
-    try %gui%['username_7' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; v
-    try %gui%['username_8' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; e
-    try %gui%['username_9' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; r
-    try %gui%['username_10'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; r
-    try %gui%['username_11'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; i
-    try %gui%['username_12'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; d
-    try %gui%['username_13'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; e
+        %gui%['username_6' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; O
+        %gui%['username_7' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; v
+        %gui%['username_8' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; e
+        %gui%['username_9' ].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; r
+        %gui%['username_10'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; r
+        %gui%['username_11'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; i
+        %gui%['username_12'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; d
+        %gui%['username_13'].SetFont(rgb[ CheckColorIndexIsValid(colorIndex+1) ]) ; e
+    }
 
     CheckColorIndexIsValid(color)
     {
@@ -272,9 +276,9 @@ DisableCommandGui()     ; disables 2nd gui layer
     MainGui['command'].Enabled := false
 }
 
-RoundedCorners(curve)   ; dynamically rounds the corners of the gui, param is the curve radius as an integer
+RoundedCorners(curve, gui)   ; dynamically rounds the corners of the gui, param is the curve radius as an integer
 {
-    WinGetPos(,, &width, &height, 'ahk_class AutoHotkeyGUI')
+    %gui%.GetPos(,, &width, &height)
     width   := 'w' width
     height  := 'h' height
     WinSetRegion('0-0 ' width ' ' height ' r' curve '-' curve, 'ahk_class AutoHotkeyGUI')
