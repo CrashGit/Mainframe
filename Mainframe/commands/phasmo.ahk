@@ -32,7 +32,7 @@ case 'phasmo':		; GUI for Phasmophobia Wiki links
 
 	PhasmoGui.SetFont('norm')
 	PhasmoGui.Show('Center w400 h468')
-	RoundedCorners(15)
+	RoundedCorners(15, 'PhasmoGui')
 	ControlFocus(PhasmoGui['username_1'])	; I don't like the look of the selection box around the buttons or tabs so this defaults to not show
 	
 ;-------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ case 'phasmo':		; GUI for Phasmophobia Wiki links
 				phasmoTabNames.Move(,,, 198)
 				PhasmoGui.Show('Center h218')
 		}
-		RoundedCorners(15)
+		RoundedCorners(15, 'PhasmoGui')
 		ControlFocus(PhasmoGui['username_1'])	; I don't like the look of the selection box around the buttons or tabs so this defaults to not show 
 	}
 
