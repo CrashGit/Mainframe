@@ -30,11 +30,8 @@ fadeOutIsRunning := false   ; used to fix notification loop when the 3 second Se
 
 ShowNotification(title, message, beepTone := 523)
 {
-    if IsSet(Notify) {
-        DestroyNotificationIfSet()  ; prevents issues if notification is already up
-    }
-
-    SoundBeep(beepTone)             ; play a tone
+    DestroyNotificationIfSet()  ; prevents issues if notification is already up
+    SoundBeep(beepTone)         ; play a tone
 
     global Notify := Gui('+AlwaysOnTop +ToolWindow -SysMenu -Caption -Border')
     Notify.MarginY := 10
