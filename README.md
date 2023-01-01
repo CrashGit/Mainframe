@@ -1,5 +1,7 @@
 # Mainframe
 
+IMPORTANT: As of January 1, 2023, AutoHotkey v2 beta 13 or lower is required. I don't know what happened to the versions after that, but they break several things for seemingly no reason. Several different, innocent things cause memory read/write errors. Built-in functions giving errors about parameters that contradict documentation (and how it was working before). Menus not working right. You get the idea.
+
 Initially started as this older, but popular gui: https://github.com/plul/Public-AutoHotKey-Scripts
 
 I have updated it to AHK v2 with very heavy modifications, adding a new aesthetic and functionality.
