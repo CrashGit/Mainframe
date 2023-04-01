@@ -14,9 +14,11 @@ The `main().ahk` file is the only thing that needs to be ran.
 
 Default hotkey is `CapsLock + Spacebar`.
 
-Type a question mark (`?`) into the box to see majority of the commands. This will give you an idea of what you can do. Some things will needs to be changed if you wish to actually use them, such as the  directories used or your email address for typing your email. The underscores (`_`) that follow the command represent a space. It should be pretty easy to figure out how to add your own when looking at the `commands.ahk` file.
+Type a question mark (`?`) into the box to see majority of the commands. This will give you an idea of what you can do. Some things will needs to be changed if you wish to actually use them, such as the directories used or your email address for typing your email. The underscores (`_`) that follow the command in the `?` help tooltip represent a space. It should be pretty easy to figure out how to add your own when looking at the `commands.ahk` file.
 
-One thing to note when adding commands, I coded the command function in a way so that every command doesn't need to destroy the gui. Because of this, there are some things that have to be wrapped in a SetTimer(). A common example of this is trying to send text to the screen. Without the timer, it would send the text to the gui before destroying it instead of the program you want the text to end up. I've included a `SendTextToScreen()` function that can automatically do that, just pass the text as a parameter.
+One thing to note when adding commands, I coded the command function in a way so that (nearly) every command doesn't need a gui.destroy(). Because of this, there are some things that have to be wrapped in a SetTimer(). A common example of this is trying to send text to the screen. Without the timer, it would send the text to the gui before destroying it instead of the program you want the text to end up. Luckily for you, I've included a `SendTextToScreen()` function that can automatically do that, just pass the text as a parameter.
+
+&nbsp;
 
 I've also included two other gui files in the commands folder that don't show up with the ? command:
 
@@ -26,10 +28,12 @@ I've also included two other gui files in the commands folder that don't show up
 
 If you don't want these two files, just delete them and remove the #Include line associated with them in `main().ahk`
 
+&nbsp;
+
 Hovering the mouse over the titles will also show a tooltip with a brief description.
 
 I wasn't a fan of TrayTips so I created a custom notification banner that fades/slides in and out.
 
-Added a unique animation when reloading the script. Still new to classes so it probably looks like a disaster to anyone used to writing them. I'm not sure how to get the text closer to one another, or how to make it easier to insert whatever text you want it to be.
+Added a unique animation when reloading the script. Still new to classes so it probably looks like a disaster to anyone used to writing them. ~~I'm not sure how to get the text closer to one another, or how to make it easier to insert whatever text you want it to be.~~ Now capable of displaying your own text! Just edit the `splashScreenText` in the `splash-screen.ahk` file.
 
 Not sure if I'll be updating this much. I didn't compensate for different dpi scalings and I'm unsure if screen resolution plays a factor in anything. Just wanted to put it out there to inspire others.
