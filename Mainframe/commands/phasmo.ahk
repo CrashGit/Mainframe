@@ -1,303 +1,182 @@
-; only one timer is allowed
-;
-; the 'reset/pause/stop timer' parameter (the last parameter) in the examples are as follow:
-; 'reset' = starts an existing timer over, or starts the last timer over
-; 'pause' = pauses/resume timer, if timer doesn't exist, it restarts the last one
-; 'stop' = stops the timer and hides the gui - default
-;
-;
-; when using Timer.Hold_to_StartTimer or Timer.Toggle_to_StartTimer methods,
-; the minutes and seconds become the new starting point when the using
-; Timer.Pause_Timer(), Timer.Reset_Timer(), or Timer.Stop_Timer()
-;
-;
-; method 1
-; example of a hotkey you have to hold to start a timer of 00:12, hold again to reset the timer if it's still running
-; parameters(minutes, seconds, key, duration to hold button, reset/pause/stop timer)
-; ~Space::{
-;     Timer.Hold_to_StartTimer(0, 12, 'Space', 1000, 'reset')
-;     KeyWait('Space')
-; }
-; 
-; 
-; method 2
-; example of a hotkey to toggle a timer of 3:00 that pauses on reactivation if timer is still running
-; parameters(minutes, seconds, hotkey reactivation action)
-; <!a::Timer.Toggle_to_StartTimer(3, 0, 'pause'), KeyWait('a')
-;
-; you can also call these methods to affect an existing or last existing Timer
-; <!s::Timer.Pause_Timer(), KeyWait('s')
-; <!d::Timer.Reset_Timer(), KeyWait('d')
-; <!f::Timer.Stop_Timer(), KeyWait('f')
-;
-; if you want to manually add a time for one-off scenarios
-; <!w::Timer.Start_TimerSelection()
-
-
-
-Timer.CreateGui()
-
-
-class Timer {
-    ; variables
-    static timer        := unset    ; TimerGui timer text
-    static timerRunning := false    ; state of Timer running, used for pause
-    static priorHotkey  := unset    ; A_PriorHotKey registers separate pause, reset, and stop method calls
-                                    ; this makes sure only calls to Hold and Toggle methods are remembered
-
-    static minutes       := 3       ; minutes left on timer
-    static seconds       := 0       ; seconds left on timer
-    static const_minutes := unset   ; keeps track of minutes sent by hotkey
-    static const_seconds := unset   ; keeps track of seconds sent by hotkey
-
-
-    ; one line functions to make code more readable
-    static UpdateTime := ObjBindMethod(this, 'UpdateDisplayedTime')
-    static UpdateTimeByOneSecond() => SetTimer(this.UpdateTime, 1000)
-    static StopUpdatingTime() => SetTimer(this.UpdateTime, 0)
-    static Toggle_Timer() => this.timerRunning := !this.timerRunning ; toggle
-
-
-    ;;;;;;;;;;;;;;;;;;;;;;
-    ; Methods
-    ;;;;;;;;;;;;;;;;;;;;;;
-
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;;
-    ; method 1 to start timer
-    static Hold_to_StartTimer(_minutes, _seconds, key, durationOfHoldToActivate, TimerAction := 'stop') {
-        if this.InvalidTime(_minutes, _seconds) ; guard clause
-            return
-
-        this.startOfKeyPress := A_TickCount ; keep track of beginning of key press
-
-        while GetKeyState(key, 'P')
-            ; if key is held at least as long as the required activation duration
-            if A_TickCount - this.startOfKeyPress >= durationOfHoldToActivate
-                break
-
-        ; if key isn't held long enough to activate
-        if A_TickCount - this.startOfKeyPress < durationOfHoldToActivate
-            return
-
-
-        this.const_minutes := _minutes
-        this.const_seconds := _seconds
-
-        this.HotkeyCheck()
-
-        ; pause, reset, or stop timer
-        try this.%TimerAction%_Timer()
-        catch {
-            MsgBox('Invalid TimerAction parameter.')
-        }
-    }
-
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;;
-    ; method 2 to start timer
-    static Toggle_to_StartTimer(_minutes, _seconds, TimerAction := 'stop') {
-        if this.InvalidTime(_minutes, _seconds)
-            return
-
-        this.const_minutes := _minutes
-        this.const_seconds := _seconds
-
-        this.HotkeyCheck()
-
-        try this.%TimerAction%_Timer()
-        catch {
-            MsgBox('Invalid TimerAction parameter.')
-        }
-    }
+case 'phasmo':		; GUI for Phasmophobia Wiki links
+	MainGui_Destroy()
 
+;-------------------------------------------------------------------------------
+; INITIAL SETUP
+;-------------------------------------------------------------------------------
+	global PhasmoGui := Gui('+AlwaysOnTop -SysMenu +ToolWindow -Caption -Border')
+	PhasmoGui.OnEvent('Escape', Phasmo_Destroy)
 
-    static UpdateDisplayedTime() {
-        try {
-            ; if more than 1 minute remain
-            if this.minutes > 0 {
-                if this.seconds = 0 {
-                    this.minutes -= 1
-                    this.seconds := 59
-                }
-                else this.seconds -= 1
-            }
-
-            ; if less than a minute remaining
-            else {
-                this.seconds -= 1
-
-                if this.seconds < 0 {
-                    this.Hide_Timer()
-                }
-            }
-
-            this.timer.Value := Format('{:02}', this.minutes) ':' Format('{:02}', this.seconds)
-        }
-    }
-
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;; TIMER ACTIONS ;;;;;;;;;;;;;;
-    static Start_Timer() {
-        this.minutes := this.const_minutes
-        this.seconds := this.const_seconds
-        try this.timer.Value := Format('{:02}', this.minutes) ':' Format('{:02}', this.seconds)
-
-        if WinExist('ahk_id ' this.TimerGui.Hwnd)
-            this.Hide_Timer()
-        else {
-            this.Toggle_Timer()
-            this.timer.Opt('cffffff')
-            this.TimerGui.Show('xCenter y-8 NoActivate')
-            this.RoundedCorners(15)
-        }
-
-        this.UpdateTimeByOneSecond()
-    }
-
-
-    static Pause_Timer() {
-        if not WinExist('ahk_id ' this.TimerGui.Hwnd) {
-            this.Start_Timer()
-            return
-        }
-
-        if this.timerRunning {
-            this.StopUpdatingTime()
-            this.timer.Opt('cffc400')
-        } else {
-            this.UpdateTimeByOneSecond()
-            this.timer.Opt('cffffff')
-        }
-        this.Toggle_Timer()
-    }
-
-
-    static Stop_Timer() {
-        if WinExist('ahk_id ' this.TimerGui.Hwnd)
-            this.Hide_Timer()
-        else
-            this.Start_Timer()
-    }
-
-
-    static Reset_Timer() {
-        this.Hide_Timer()
-        this.Start_Timer()
-    }
-
-
-    static Start_TimerSelection() {
-        this.TimerSelection.Show('AutoSize')
-        ControlFocus(this.minutesBox)
-    }
-    ;;;;;;;;;;;;;; TIMER ACTIONS ;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
-    static CreateGui() {
-        this.TimerGui := Gui('+AlwaysOnTop -SysMenu +ToolWindow -Caption -Border')
-        this.TimerGui.SetFont('cffffff s12 bold')
-        this.TimerGui.BackColor := '292a35'
-        this.timer := this.TimerGui.AddText('y+15', Format('{:02}', this.minutes) ':' Format('{:02}', this.seconds))
-
-
-
-        this.TimerSelection := Gui('+AlwaysOnTop')
-        this.TimerSelection.OnEvent('Escape', (*) => this.Hide_Timer_Selection())
-
-        this.TimerSelection.SetFont('cffffff s12 bold')
-        this.TimerSelection.BackColor := this.TimerGui.BackColor
-
-        this.TimerSelection.AddText('', 'Enter a time:')
-        this.TimerSelection.SetFont('c000000 norm')
-
-        this.minutesBox := this.TimerSelection.AddEdit('Limit2 Number')
-        this.minutesBox.OnEvent('Change', (*) => this.CheckMinutes(this.minutesBox.value))
-
-        this.secondsBox := this.TimerSelection.AddEdit('Limit2 Number')
-        this.secondsBox.OnEvent('Change', (*) => this.CheckSeconds(this.secondsBox.value))
-
-        this.TimerSelection.AddButton('x-10 y-10 w1 h1 +default').OnEvent('Click', (*) => this.TimerInput(this.minutesBox.value, this.secondsBox.value))
-    }
-
-
-    ; safe guards for minute box
-    static CheckMinutes(minutes) {
-        if minutes = ''
-            this.minutesBox.value := ''
-
-        else if minutes > 59
-            this.minutesBox.value := 59
-    }
-
-
-    ; safe guards for seconds box
-    static CheckSeconds(seconds) {
-        if seconds = ''
-            this.secondsBox.value := ''
-
-        else if seconds > 59
-            this.secondsBox.value := 59
-    }
-
-    ; on pressing enter
-    static TimerInput(minutes, seconds) {
-        minutes := minutes = '' ? 0 : minutes
-        seconds := seconds = '' ? 0 : seconds
-
-        if WinExist('ahk_id ' this.TimerGui.Hwnd)
-            this.Hide_Timer()
-
-        this.Toggle_to_StartTimer(minutes, seconds)
-        this.Hide_Timer_Selection()
-    }
-
-
-
-    static RoundedCorners(curve) { ; dynamically rounds the corners of the gui, param is the curve radius as an integer
-        this.TimerGui.GetPos(,, &width, &height)
-        WinSetRegion('0-0 w' width ' h' height ' r' curve '-' curve, this.TimerGui)
-    }
-
-
-    ; check if the parameters used follow xx:xx format
-    static InvalidTime(minutes, seconds) {
-        if StrLen(minutes) > 2 or StrLen(seconds) > 2 or
-            (minutes = 0 and seconds = 0) {
-            MsgBox('The time you entered is invalid.`nMax time allowed: 59:59`nMin time allowed: 00:01')
-            return true
-        }
-    }
-
-
-    ; check if a different timer is trying to be set with another hotkey
-    static HotkeyCheck() {
-        if A_ThisHotkey != this.priorHotkey {
-            this.minutes         := this.const_minutes
-            this.seconds         := this.const_seconds
-            this.priorHotkey     := A_ThisHotkey
-            this.timerRunning    := false
-            try this.timer.Value := Format('{:02}', this.minutes) ':' Format('{:02}', this.seconds)
-        }
-    }
-
-
-    static Hide_Timer() {
-        if WinExist('ahk_id ' this.TimerGui.Hwnd) {
-            this.TimerGui.Hide()
-            this.StopUpdatingTime()
-            this.timerRunning := false
-        }
-    }
-
-    static Hide_Timer_Selection(*) {
-        if WinExist('ahk_id ' this.TimerSelection.Hwnd) {
-            this.minutesBox.value := ''
-            this.secondsBox.value := ''
-            this.TimerSelection.Hide()
-        }
-    }
-} ;;;;;;;;;;;;;;;;;;END OF CLASS;;;;;;;;;;;;;;;;;;;
+	PhasmoGui.BackColor := '292a35'
+
+	PhasmoGui.SetFont('s11 bold', 'Segoe UI')
+	PhasmoGui.AddText('x277 y17 h10	vusername_1',   'C')
+	PhasmoGui.AddText('x+0  yp      vusername_2',   'r')
+	PhasmoGui.AddText('x+0  yp      vusername_3',   'a')
+	PhasmoGui.AddText('x+0  yp      vusername_4',   's')
+	PhasmoGui.AddText('x+0  yp      vusername_5',   'h ')
+
+	PhasmoGui.AddText('x+0  yp      vusername_6',   'O')
+	PhasmoGui.AddText('x+0  yp      vusername_7',   'v')
+	PhasmoGui.AddText('x+0  yp      vusername_8',   'e')
+	PhasmoGui.AddText('x+0  yp      vusername_9',   'r')
+	PhasmoGui.AddText('x+0  yp      vusername_10',  'r')
+	PhasmoGui.AddText('x+0  yp      vusername_11',  'i')
+	PhasmoGui.AddText('x+0  yp      vusername_12',  'd')
+	PhasmoGui.AddText('x+0  yp      vusername_13',  'e')
+
+	RGBusernameSetup := (*) => RGBusername('PhasmoGui')
+    SetTimer(RGBusernameSetup, 100)
+
+	PhasmoGui.SetFont('s11')
+	phasmoTabNames := PhasmoGui.AddTab3(blue ' x10 y10 w380 h448', ['Ghosts', 'Equipment', 'Cursed Items'])
+	phasmoTabNames.OnEvent('Change', Gui_Size)
+
+	PhasmoGui.SetFont('norm')
+	PhasmoGui.Show('Center w400 h468')
+	RoundedCorners(15, 'PhasmoGui')
+	ControlFocus(PhasmoGui['username_1'])	; I don't like the look of the selection box around the buttons or tabs so this defaults to not show
+
+;-------------------------------------------------------------------------------
+; GHOSTS
+;-------------------------------------------------------------------------------
+	phasmoTabNames.UseTab('Ghosts')
+
+	ghostArray := ['Banshee', 'Demon', 'Deogen', 'Goryo', 'Hantu'
+	, 'Jinn', 'Mare', 'Moroi', 'Myling', 'Obake', 'Oni', 'Onryo'
+	, 'Phantom', 'Poltergeist', 'Raiju', 'Revenant', 'Shade', 'Spirit'
+	, 'Thaye', 'The Mimic', 'The Twins', 'Wraith', 'Yokai', 'Yurei']
+
+	CreateAndAlignButtons(ghostArray, 30, 120, 3, 57, 50)
+
+	PhasmoGui.SetFont('s9')
+	PhasmoGui.AddText(white ' x0 yp+32 w370 h30 Right', '*Hold control while clicking to keep menu open')
+
+;-------------------------------------------------------------------------------
+; EQUIPMENT
+;-------------------------------------------------------------------------------
+	PhasmoTabNames.UseTab('Equipment')
+
+	PhasmoGui.SetFont('bold')
+	PhasmoGui.AddText(yellow ' x147 y45 w105 h30 vstarterText', 'Starter Equipment')
+	PhasmoGui['starterText'].OnEvent('Click', OpenStarterPage)
+
+
+	PhasmoGui.SetFont('norm')
+	equipmentArray := ['D.O.T.S. Projector', 'EMF Reader', 'Flashlight', 'Ghost Writing Book', 'Spirit Box', 'Photo Camera', 'UV Flashlight', 'Video Camera']
+
+	CreateAndAlignButtons(equipmentArray, 30, 120, 3, 65, 50)
+
+	PhasmoGui.SetFont('s9 bold')
+	optionalText := PhasmoGui.AddText(yellow ' x145 yp+50 w110 hp', 'Optional Equipment')
+	optionalText.OnEvent('Click', OpenOptionalPage)
+
+	PhasmoGui.SetFont('norm')
+	equipmentArray2 := ['Candle', 'Crucifix', 'Glowstick', 'Head Mounted Camera', 'Lighter', 'Motion Sensor', 'Parabolic Microphone', 'Salt', 'Sanity Pills', 'Smudge Sticks', 'Sound Sensor', 'Strong Flashlight', 'Thermometer', 'Tripod']
+
+	CreateAndAlignButtons(equipmentArray2, 30, 120, 3, 235, 50)
+
+	PhasmoGui.SetFont('s9')
+	PhasmoGui.AddText(white ' x0	yp+32 w370 h30 Right', '*Hold control while clicking to keep menu open')
+
+;-------------------------------------------------------------------------------
+; CURSED ITEMS
+;-------------------------------------------------------------------------------
+	PhasmoTabNames.UseTab('Cursed Items')
+
+	cursedItemArray := ['Bone Evidence', 'Haunted Mirror', 'Music Box', 'Ouija Board', 'Summoning Circle', 'Tarot Cards', 'Voodoo Doll', 'Monkey Paw']
+
+	CreateAndAlignButtons(cursedItemArray, 30, 120, 3, 57, 50)
+
+	PhasmoGui.SetFont('s9')
+	PhasmoGui.AddText(white ' x0	yp+32 w370 h30 Right', '*Hold control while clicking to keep menu open')
+
+;-------------------------------------------------------------------------------
+; INSERT GUI BUTTON
+;-------------------------------------------------------------------------------
+	CreateAndAlignButtons(array, width, widthOffset, columns, height, heightOffset)
+	{
+		columnCount := columns	; copy of columns var to manipulate without interfering with other code
+
+		for index, item in array
+		{
+			if StrLen(item) < 13	; this if/else automates the font size
+				PhasmoGui.SetFont('s11')
+			else
+				PhasmoGui.SetFont('s9')
+
+			; determine x position of button
+			if Mod(index, columns) = 1 || index = 1	; if first (top) button in column, set xPos to xwidth
+				xPos := 'x' width
+			else									; if not first (top) button in column, set xPos to xp+widthOffset
+				xPos := 'xp+' widthOffset
+
+			; determine y position of button
+			if index <= columns						; if first row, set yPos to yheight
+				yPos := 'y' height
+			else if index <= columnCount			; if in the same row as previous button, set yPos to yp (previous y value)
+				yPos := 'yp'
+			else {									; if index exceeds amount of buttons allowed in row, start new row and set yPos to yp+heightOffset
+				yPos := 'yp+' . heightOffset
+				columnCount += columns				; add column count, each iteration it's essentially checking what row it's on
+			}
+
+			phasmoButton := PhasmoGui.AddButton(xPos ' ' yPos ' w100 h30', item)
+			phasmoButton.buttonName := item
+			phasmoButton.OnEvent('Click', (phasmoButton, *) => WikiPage(phasmoButton.buttonName))
+		}
+	}
+
+;-------------------------------------------------------------------------------
+; OPEN WIKI PAGE
+;-------------------------------------------------------------------------------
+	OpenStarterPage(*)
+	{
+		WikiPage('Equipment#:~:text=Onsite`%20equipment-,Starter`%20equipment,-Starter`%20Equipment`%20is')
+	}
+
+	OpenOptionalPage(*)
+	{
+		WikiPage('Equipment#:~:text=Projector`%20evidence.-,Optional`%20equipment,-This`%20equipment`%20must')
+	}
+
+	WikiPage(page)
+	{
+		if GetKeyState('Control', 'P') = 0  				; if control is not held when button is clicked, destroy gui
+			Phasmo_Destroy()
+
+		Run('https://Phasmophobia.fandom.com/wiki/' page) 	; open wiki for Phasmo to page relevant to the button clicked
+	}
+
+;-------------------------------------------------------------------------------
+; CHANGE WINDOWS SIZE PER TAB
+;-------------------------------------------------------------------------------
+	Gui_Size(*)		; changes size of window, I didn't like looking at a wall of nothing when there were few buttons on some tabs
+	{
+		switch phasmoTabNames.Text
+		{
+			case 'Ghosts':
+				phasmoTabNames.Move(,,, 448)
+				PhasmoGui.Show('Center h468')
+			case 'Equipment':
+				phasmoTabNames.Move(,,, 476)
+				PhasmoGui.Show('Center h496')
+			case 'Cursed Items':
+				phasmoTabNames.Move(,,, 198)
+				PhasmoGui.Show('Center h218')
+		}
+		RoundedCorners(15, 'PhasmoGui')
+		ControlFocus(PhasmoGui['username_1'])	; I don't like the look of the selection box around the buttons or tabs so this defaults to not show
+	}
+
+;-------------------------------------------------------------------------------
+; DESTROY GUI
+;-------------------------------------------------------------------------------
+	Phasmo_Destroy(*)
+	{
+		if IsSet(PhasmoGui) {
+			PhasmoGui.Destroy()
+			PhasmoGui := unset
+			SetTimer(RGBusernameSetup, 0)
+		}
+	}
