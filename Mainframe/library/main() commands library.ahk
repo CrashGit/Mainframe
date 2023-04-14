@@ -1,4 +1,4 @@
-﻿;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
 ; MAIN() FUNCTIONS
 ;-------------------------------------------------------------------------------
@@ -9,23 +9,30 @@
 ;-------------------------------------------------------------------------------
 Search(secondary_input, *)          ; search websites
 {
-    query_safe := uriEncode(search_url)
-    search_final_url := StrReplace(search_url, 'REPLACEME', secondary_input)
+    query_safe := UrlEncode(secondary_input)
+    search_final_url := StrReplace(search_url, 'REPLACEME', query_safe)
     Run(search_final_url)
 
-    uriEncode(str)                  ; unsure if I converted this correctly, seems to be working so far
-    {
-        if RegExMatch(str, Format("{:x}",'^\w+:/{0,2}'), &pr)
-            str := SubStr(str, 1, StrLen(pr))
-    
-        str := StrReplace(str, '%', '%25')
-        loop
-            if RegExMatch(str, Format("{:x}",'i)[^\w\.~%/:]'), &char)
-               str := StrReplace(str, char, '%' SubStr(Ord(char), 3))
-        else 
-            break
-    
-        return(pr str)
+    UrlEncode(str, sExcepts := "-_.", enc := "UTF-8") {
+        hex     := "00", func := "msvcrt\swprintf"
+        buff    := Buffer(StrPut(str, enc)), StrPut(str, buff, enc)
+        encoded := ""
+        loop {
+            if (!b := NumGet(buff, A_Index - 1, "UChar"))
+                break
+            ch := Chr(b)
+            ; "is alnum" is not used because it is locale dependent.
+            if (b >= 0x41 && b <= 0x5A ; A-Z
+                || b >= 0x61 && b <= 0x7A ; a-z
+                || b >= 0x30 && b <= 0x39 ; 0-9
+                || InStr(sExcepts, Chr(b), true))
+                encoded .= Chr(b)
+            else {
+                DllCall(func, "Str", hex, "Str", "%%%02X", "UChar", b, "Cdecl")
+                encoded .= hex
+            }
+        }
+        return encoded
     }
 }
 
