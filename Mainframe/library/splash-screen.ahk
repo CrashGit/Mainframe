@@ -143,6 +143,10 @@ class BouncingText
             SetTimer(this.falling, 0)
             SetTimer(this.bouncing, 0)
             SetTimer(this.coloring, 0)
+            this.bouncing := unset
+            this.destroy  := unset
+            this.falling  := unset
+            this.coloring := unset
         }
     }
 
