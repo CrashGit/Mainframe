@@ -47,7 +47,7 @@ class BouncingText
         this.purple := 'cb696f5'
         this.white  := 'cf0f0f0'
         this.orange := 'cffd975'
-        this.rgb    := [pink, blue, green, yellow, purple, white, orange]
+        this.rgb    := [this.pink, this.blue, this.green, this.yellow, this.purple, this.white, this.orange]
 
         ; variables
         this.acceleration   := 1
