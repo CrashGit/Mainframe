@@ -1,6 +1,6 @@
 # Mainframe
 
-> IMPORTANT: As of January 1, 2023, AutoHotkey v2 beta 13 or lower is required. I don't know what happened to the versions after that, but they break several things for seemingly no reason. Several different, innocent things cause memory read/write errors. Built-in functions giving errors about parameters that contradict documentation (and how it was working before). Menus not working right. You get the idea.
+> IMPORTANT: Edit: June 20, 2023 - I believe the recent update to AHK 2.0.3 has fixed menu problems. So far, it has been running fine on the latest version of AHK. ~~As of January 1, 2023, AutoHotkey v2 beta 13 or lower is required. I don't know what happened to the versions after that, but they break several things for seemingly no reason. Several different, innocent things cause memory read/write errors. Built-in functions giving errors about parameters that contradict documentation (and how it was working before). Menus not working right. You get the idea.~~
 
 &nbsp;
 
